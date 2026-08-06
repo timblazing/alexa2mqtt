@@ -217,6 +217,17 @@ export const initializeAlexa = async (
 
   remote.on('cookie', () => {
     const authentication = remote.cookieData as unknown;
+    // alexa-remote2 also emits `cookie` while applying a saved cookie string,
+    // before it has restored the complete registration object. A later login or
+    // refresh event carries the persistable cookieData.
+    if (!isAuthenticationData(authentication)) {
+      if (config.debug) {
+        console.debug(
+          'Skipped an Alexa cookie event until registration data is complete',
+        );
+      }
+      return;
+    }
     pendingSave = pendingSave
       .then(() => saveAuthentication(authPath, authentication))
       .then(() => console.info(`Alexa authentication saved to ${authPath}`))

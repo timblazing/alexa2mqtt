@@ -122,20 +122,19 @@ amazon-air-quality-mqtt/
 ├── .github/workflows/
 │   ├── ci.yml            # lint, typecheck, test, build, docker build
 │   └── publish.yml       # on tag: multi-arch image → GHCR + GitHub release
-├── amazon_air_quality_mqtt/       # the app folder (slug)
-│   ├── app/                       # Node.js/TypeScript bridge
-│   │   ├── src/
-│   │   │   ├── alexa.ts           # AlexaRemote init, auth persistence, discovery, GraphQL state query
-│   │   │   ├── parser.ts          # GraphQL response → normalized reading (pure, unit-tested)
-│   │   │   ├── mqtt.ts            # connect, discovery payload, state publish, LWT
-│   │   │   ├── state.ts           # last-known-state load/merge/save (/data/last-state.json)
-│   │   │   ├── config.ts          # env-var config (populated by run.sh)
-│   │   │   ├── server.ts          # tiny HTTP server: /healthz + minimal status page
-│   │   │   └── index.ts           # wire-up + poll loop
-│   │   ├── test/                  # unit tests + sanitized fixtures
-│   │   ├── package.json
-│   │   └── tsconfig.json
+├── app/                       # Home Assistant app + Node.js/TypeScript bridge
+│   ├── src/
+│   │   ├── alexa.ts           # AlexaRemote init, auth persistence, discovery, GraphQL state query
+│   │   ├── parser.ts          # GraphQL response → normalized reading (pure, unit-tested)
+│   │   ├── mqtt.ts            # connect, discovery payload, state publish, LWT
+│   │   ├── state.ts           # last-known-state load/merge/save (/data/last-state.json)
+│   │   ├── config.ts          # env-var config (populated by run.sh)
+│   │   ├── server.ts          # tiny HTTP server: /healthz + minimal status page
+│   │   └── index.ts           # wire-up + poll loop
+│   ├── test/                  # unit tests + sanitized fixtures
 │   ├── translations/en.yaml
+│   ├── package.json
+│   ├── tsconfig.json
 │   ├── config.yaml
 │   ├── Dockerfile
 │   ├── run.sh
@@ -302,9 +301,9 @@ Multi-stage build; Dockerfile is the build source of truth (no `build.yaml`):
 ```dockerfile
 FROM node:22-alpine AS builder
 WORKDIR /build
-COPY app/package*.json ./
+COPY package*.json ./
 RUN npm ci
-COPY app/ ./
+COPY . ./
 RUN npm run build && npm prune --omit=dev
 
 FROM ghcr.io/home-assistant/base:<pinned>
@@ -357,8 +356,11 @@ cookie refresh. **Validated:** proxy authentication completed, auth and sanitize
 were persisted, one monitor was discovered, and the real response produced temperature,
 humidity, raw IAQ, PM2.5, CO ppm/detected, and VOC index values.
 
-**Phase 2 — MQTT bridge.** Point it at any broker; publish device discovery + retained
-state; verify all entities appear under one device in HA; implement last-known-state merge.
+**Phase 2 — MQTT bridge (implementation complete; live HA validation pending).** Point it at
+any broker; publish device discovery + retained state; verify all entities appear under one
+device in HA; implement last-known-state merge. The bridge, cache, polling, and unit coverage
+are implemented; the remaining acceptance step is verification against a live broker and
+Home Assistant instance.
 
 **Phase 3 — Home Assistant App packaging.** config.yaml, Dockerfile, run.sh, bashio MQTT
 credentials, status page + `/healthz`, install from this repo as a custom repository.

@@ -3,9 +3,10 @@
 A Home Assistant App (add-on) that connects **Amazon Smart Air Quality Monitors** to Home
 Assistant via **MQTT** — no Homebridge required.
 
-> **Status: Phase 1 complete / pre-alpha.** Authentication, discovery, and raw state queries
-> were validated against a real monitor on August 6, 2026. Phase 2 (MQTT) is next; nothing is
-> installable as a Home Assistant app yet. See [`plan.md`](plan.md).
+> **Status: Phase 2 implementation complete / pre-alpha.** Authentication and raw state
+> queries were validated against a real monitor on August 6, 2026. The MQTT bridge and
+> last-known-state cache are implemented and awaiting live Home Assistant validation. Nothing
+> is installable as a Home Assistant app yet. See [`plan.md`](plan.md).
 
 ## What it will do
 
@@ -24,9 +25,9 @@ Assistant via **MQTT** — no Homebridge required.
 - Uses Amazon's **unofficial** Alexa API — Amazon can break it at any time.
 - Cloud-derived CO readings are **not** a substitute for a certified local CO alarm.
 
-## Phase 1 development
+## Development
 
-Requires Node.js 22 or newer. From `amazon_air_quality_mqtt/app`:
+Requires Node.js 22 or newer. From `app`:
 
 ```sh
 npm install
@@ -35,10 +36,27 @@ npm run dev
 ```
 
 `npm run dev` loads `.env` when it exists. Set `ALEXA_PROXY_HOST` to an IP address reachable
-by the browser you will use to sign in. The CLI prints the login URL, persists authentication
-to `data/auth.json` with owner-only permissions, discovers air-quality monitors, and writes
-only sanitized API captures under `data/captures/`. Set `ALEXA_ONCE=true` for a one-shot run;
-otherwise it stays alive so cookie refresh can be observed.
+by the browser you will use to sign in, and point `MQTT_HOST` (plus optional credentials) at
+an MQTT broker used by Home Assistant. The bridge prints the Amazon login URL when needed,
+persists authentication to `data/auth.json`, and publishes one retained MQTT device-discovery
+payload per monitor.
+
+Valid readings are merged into `data/last-state.json` before being published. Partial or
+failed Amazon responses never clear an earlier measurement; a failure only turns off the
+`Amazon connected` diagnostic. On restart, cached readings are republished as soon as MQTT
+connects. Set `ALEXA_ONCE=true` for a one-shot development run; the normal mode polls at
+`POLL_INTERVAL` seconds and retries failures with bounded exponential backoff.
+
+Phase 2 uses these topics by default:
+
+```text
+amazon_air_quality/bridge/availability
+amazon_air_quality/<device_id>/state
+homeassistant/device/<device_id>/config
+```
+
+Discovery and state messages use QoS 1 and are retained. The bridge also republishes them
+when Home Assistant sends its `homeassistant/status` birth message.
 
 Development checks:
 

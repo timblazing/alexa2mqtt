@@ -356,11 +356,12 @@ cookie refresh. **Validated:** proxy authentication completed, auth and sanitize
 were persisted, one monitor was discovered, and the real response produced temperature,
 humidity, raw IAQ, PM2.5, CO ppm/detected, and VOC index values.
 
-**Phase 2 — MQTT bridge (implementation complete; live HA validation pending).** Point it at
-any broker; publish device discovery + retained state; verify all entities appear under one
-device in HA; implement last-known-state merge. The bridge, cache, polling, and unit coverage
-are implemented; the remaining acceptance step is verification against a live broker and
-Home Assistant instance.
+**Phase 2 — MQTT bridge (complete, validated 2026-08-06).** Point it at any broker; publish
+device discovery + retained state; verify all entities appear under one device in HA;
+implement last-known-state merge. **Validated:** the real monitor appeared as one MQTT device
+with all 10 entities and fresh readings; measurements persisted when the bridge stopped and
+when Alexa auth was withheld; both connectivity diagnostics changed correctly; cached state,
+Alexa authentication, and fresh polling recovered after restart.
 
 **Phase 3 — Home Assistant App packaging.** config.yaml, Dockerfile, run.sh, bashio MQTT
 credentials, status page + `/healthz`, install from this repo as a custom repository.

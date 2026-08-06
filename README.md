@@ -3,10 +3,11 @@
 A Home Assistant App (add-on) that connects **Amazon Smart Air Quality Monitors** to Home
 Assistant via **MQTT** — no Homebridge required.
 
-> **Status: Phase 2 implementation complete / pre-alpha.** Authentication and raw state
-> queries were validated against a real monitor on August 6, 2026. The MQTT bridge and
-> last-known-state cache are implemented and awaiting live Home Assistant validation. Nothing
-> is installable as a Home Assistant app yet. See [`plan.md`](plan.md).
+> **Status: Phase 2 complete / pre-alpha.** Authentication, raw state queries, MQTT discovery,
+> all 10 entities, retained measurements, connectivity diagnostics, and restart recovery were
+> validated against a real monitor and Home Assistant instance on August 6, 2026. Phase 3
+> packaging is next; nothing is installable as a Home Assistant app yet. See
+> [`plan.md`](plan.md).
 
 ## What it will do
 

@@ -1,0 +1,129 @@
+{
+  "data": {
+    "endpoint": {
+      "features": [
+        {
+          "name": "temperatureSensor",
+          "properties": [
+            {
+              "name": "temperature",
+              "value": {
+                "value": 22,
+                "scale": "CELSIUS"
+              }
+            }
+          ],
+          "configuration": null
+        },
+        {
+          "name": "range",
+          "properties": [
+            {
+              "name": "rangeValue",
+              "rangeValue": {
+                "value": 50
+              }
+            }
+          ],
+          "configuration": {
+            "friendlyName": {
+              "value": {
+                "text": "Indoor humidity"
+              }
+            }
+          }
+        },
+        {
+          "name": "range",
+          "properties": [
+            {
+              "name": "rangeValue",
+              "rangeValue": {
+                "value": 91
+              }
+            }
+          ],
+          "configuration": {
+            "friendlyName": {
+              "value": {
+                "text": "Indoor air quality"
+              }
+            }
+          }
+        },
+        {
+          "name": "range",
+          "properties": [
+            {
+              "name": "rangeValue",
+              "rangeValue": {
+                "value": 8
+              }
+            }
+          ],
+          "configuration": {
+            "friendlyName": {
+              "value": {
+                "text": "Particulate matter PM10"
+              }
+            }
+          }
+        },
+        {
+          "name": "range",
+          "properties": [
+            {
+              "name": "rangeValue",
+              "rangeValue": {
+                "value": 0
+              }
+            }
+          ],
+          "configuration": {
+            "friendlyName": {
+              "value": {
+                "text": "Carbon monoxide"
+              }
+            }
+          }
+        },
+        {
+          "name": "range",
+          "properties": [
+            {
+              "name": "rangeValue",
+              "rangeValue": {
+                "value": 5
+              }
+            }
+          ],
+          "configuration": {
+            "friendlyName": {
+              "value": {
+                "text": "Volatile organic compounds"
+              }
+            }
+          }
+        },
+        {
+          "name": "range",
+          "properties": [
+            {
+              "name": "rangeValue",
+              "rangeValue": {
+                "value": 8
+              }
+            }
+          ],
+          "configuration": {
+            "friendlyName": {
+              "value": {
+                "text": "Particulate matter"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

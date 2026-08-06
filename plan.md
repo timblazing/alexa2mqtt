@@ -104,8 +104,11 @@ One MQTT device per monitor with these components:
 Expected values for the test device (sanity check against the Alexa app):
 IAQ ≈ 97, temp ≈ 22.5 °C, humidity ≈ 52 %, PM2.5 ≈ 3, CO ≈ 1 ppm, VOC index ≈ 2.
 
-The exact range friendly names must be confirmed in Phase 1 from a real API response —
-log the full discovery payload once and copy the names into the parser.
+Phase 1 confirmed the exact range friendly names from a real API response:
+`"Indoor humidity"`, `"Indoor air quality"`, `"Particulate matter PM10"`,
+`"Carbon monoxide"`, `"Volatile organic compounds"`, and `"Particulate matter"`.
+The generic `"Particulate matter"` feature supplies PM2.5; the separate PM10 feature is
+intentionally ignored in v0.1.
 
 Deferred from the original plan: separate `iaq_status` text sensor, `data_fresh` binary sensor
 (the `Last update` timestamp already conveys staleness), and the `Refresh now` button.
@@ -345,12 +348,14 @@ Deferred: Mosquitto-container integration tests. Instead, a manual acceptance ch
 
 ## Implementation phases
 
-**Phase 1 — standalone proof of concept (the risky part; do this first).**
+**Phase 1 — standalone proof of concept (complete, validated 2026-08-06).**
 A plain Node CLI, no Docker, no MQTT: authenticate via the proxy flow, persist cookieData,
 list devices, find the air-quality monitor, run the GraphQL query, print one normalized
 JSON object. Capture and sanitize real response fixtures (this pins down the exact range
 friendly names). Confirm raw IAQ score and CO ppm. Let it run a few hours to observe
-cookie refresh. **Do not proceed until this works.**
+cookie refresh. **Validated:** proxy authentication completed, auth and sanitized captures
+were persisted, one monitor was discovered, and the real response produced temperature,
+humidity, raw IAQ, PM2.5, CO ppm/detected, and VOC index values.
 
 **Phase 2 — MQTT bridge.** Point it at any broker; publish device discovery + retained
 state; verify all entities appear under one device in HA; implement last-known-state merge.

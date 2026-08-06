@@ -3,8 +3,9 @@
 A Home Assistant App (add-on) that connects **Amazon Smart Air Quality Monitors** to Home
 Assistant via **MQTT** — no Homebridge required.
 
-> **Status: planning / pre-alpha.** Nothing is installable yet. See [`plan.md`](plan.md)
-> for the full build plan.
+> **Status: Phase 1 complete / pre-alpha.** Authentication, discovery, and raw state queries
+> were validated against a real monitor on August 6, 2026. Phase 2 (MQTT) is next; nothing is
+> installable as a Home Assistant app yet. See [`plan.md`](plan.md).
 
 ## What it will do
 
@@ -22,6 +23,31 @@ Assistant via **MQTT** — no Homebridge required.
 
 - Uses Amazon's **unofficial** Alexa API — Amazon can break it at any time.
 - Cloud-derived CO readings are **not** a substitute for a certified local CO alarm.
+
+## Phase 1 development
+
+Requires Node.js 22 or newer. From `amazon_air_quality_mqtt/app`:
+
+```sh
+npm install
+cp .env.example .env
+npm run dev
+```
+
+`npm run dev` loads `.env` when it exists. Set `ALEXA_PROXY_HOST` to an IP address reachable
+by the browser you will use to sign in. The CLI prints the login URL, persists authentication
+to `data/auth.json` with owner-only permissions, discovers air-quality monitors, and writes
+only sanitized API captures under `data/captures/`. Set `ALEXA_ONCE=true` for a one-shot run;
+otherwise it stays alive so cookie refresh can be observed.
+
+Development checks:
+
+```sh
+npm run lint
+npm run typecheck
+npm test
+npm run build
+```
 
 ## Attribution
 

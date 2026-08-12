@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.0
+
+First published release. Images now come from GitHub Container Registry instead
+of being built by Supervisor.
+
+- Adds the versioned `image:` key, so **Auto update** works. Installing no longer
+  waits several minutes for a local build.
+- Publishes `ghcr.io/timblazing/alexa2mqtt-amd64` and
+  `ghcr.io/timblazing/alexa2mqtt-aarch64` from a `v*` tag, after checking that the
+  tag matches the version in `config.yaml`.
+- New app icon and logo.
+
 ## 0.2.0
 
 Renamed from *Amazon Air Quality to MQTT* to **Alexa2MQTT**. Both identifiers

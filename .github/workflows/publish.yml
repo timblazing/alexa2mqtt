@@ -1,0 +1,102 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  verify:
+    name: Tag matches app version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compare tag with config.yaml
+        id: version
+        run: |
+          set -euo pipefail
+          tag_version="${GITHUB_REF_NAME#v}"
+          config_version="$(sed -n 's/^version:[[:space:]]*"\{0,1\}\([^"]*\)"\{0,1\}[[:space:]]*$/\1/p' app/config.yaml)"
+          if [ -z "$config_version" ]; then
+            echo "::error::Could not read version from app/config.yaml"
+            exit 1
+          fi
+          if [ "$tag_version" != "$config_version" ]; then
+            echo "::error::Tag v${tag_version} does not match app/config.yaml version ${config_version}"
+            exit 1
+          fi
+          echo "version=${config_version}" >>"$GITHUB_OUTPUT"
+
+  image:
+    name: Publish image (${{ matrix.arch }})
+    needs: verify
+    runs-on: ubuntu-latest
+    # aarch64 builds run under QEMU and are slow on a cache miss.
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            platform: linux/amd64
+          - arch: aarch64
+            platform: linux/arm64
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      # Supervisor resolves image: "ghcr.io/<owner>/alexa2mqtt-{arch}" and appends
+      # :<version> from config.yaml, so each arch is its own single-arch repository.
+      - name: Push
+        uses: docker/build-push-action@v6
+        with:
+          context: app
+          platforms: ${{ matrix.platform }}
+          push: true
+          provenance: false
+          tags: |
+            ghcr.io/${{ github.repository }}-${{ matrix.arch }}:${{ needs.verify.outputs.version }}
+            ghcr.io/${{ github.repository }}-${{ matrix.arch }}:latest
+          build-args: |
+            BUILD_ARCH=${{ matrix.arch }}
+            BUILD_REF=${{ github.sha }}
+            BUILD_VERSION=${{ needs.verify.outputs.version }}
+          cache-from: type=gha,scope=${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.arch }}
+
+  release:
+    name: GitHub release
+    needs: [verify, image]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract release notes from the changelog
+        run: |
+          set -euo pipefail
+          awk -v version="${{ needs.verify.outputs.version }}" '
+            $0 == "## " version { found = 1; next }
+            found && /^## / { exit }
+            found { print }
+          ' app/CHANGELOG.md >notes.md
+          if [ ! -s notes.md ]; then
+            echo "::error::app/CHANGELOG.md has no section for ${{ needs.verify.outputs.version }}"
+            exit 1
+          fi
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --title "$GITHUB_REF_NAME" \
+            --notes-file notes.md

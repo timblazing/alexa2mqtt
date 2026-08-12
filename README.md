@@ -1,25 +1,26 @@
-<img src="app/logo.png" alt="" width="250" height="100">
+<img src="app/logo.png" alt="" width="250" height="150">
 
 # Alexa2MQTT
 
 A Home Assistant App (add-on) that connects **Amazon Smart Air Quality Monitors** to Home
 Assistant via **MQTT** — no Homebridge required.
 
-> **Status: Phase 3 complete / pre-alpha.** Installed and running as a Home Assistant app on
-> a real instance since August 12, 2026: Supervisor builds it from the Dockerfile, broker
-> credentials resolve automatically, Amazon sign-in persists across restarts and updates, and
-> all 11 entities update unattended on the poll interval. Images are not published to a
-> registry yet, so **Auto update does nothing** — that is Phase 4. See [`plan.md`](plan.md).
+> **Status: Phase 4 complete / alpha.** Running as a Home Assistant app on a real instance
+> since August 12, 2026: broker credentials resolve automatically, Amazon sign-in persists
+> across restarts and updates, and all 11 entities update unattended on the poll interval.
+> Multi-arch images are published to GHCR, so **Auto update** works. See [`plan.md`](plan.md).
 
 ## Install as a Home Assistant app
 
-1. Put this repository somewhere Home Assistant can reach it (a Git remote, or clone it into
-   `/addons` on the Home Assistant host).
-2. **Settings → Add-ons/Apps → Apps page → ⋮ → Repositories**, add the repository URL, and
-   reload. Skip this step for a clone in `/addons`.
-3. Install **Alexa2MQTT** and start it. Supervisor builds the image locally
-   from [`app/Dockerfile`](app/Dockerfile); the first build takes a few minutes.
-4. Open the Web UI and follow the Amazon login link on port 8098 of the Home Assistant host.
+1. **Settings → Add-ons/Apps → Apps page → ⋮ → Repositories**, add
+   `https://github.com/timblazing/alexa2mqtt`, and reload.
+2. Install **Alexa2MQTT** and start it. Supervisor pulls a prebuilt image for your
+   architecture — amd64 and aarch64 are published.
+3. Open the Web UI and follow the Amazon login link on port 8098 of the Home Assistant host.
+
+To hack on it instead, clone the repository into `/addons` on the Home Assistant host and
+delete the `image:` key from [`app/config.yaml`](app/config.yaml); Supervisor then builds
+locally from [`app/Dockerfile`](app/Dockerfile).
 
 Full app documentation lives in [`app/DOCS.md`](app/DOCS.md).
 
@@ -84,6 +85,21 @@ npm run typecheck
 npm test
 npm run build
 ```
+
+## Releasing
+
+1. Bump `version` in [`app/config.yaml`](app/config.yaml) and add a matching section to
+   [`app/CHANGELOG.md`](app/CHANGELOG.md).
+2. Commit, then tag with the same version prefixed by `v` and push the tag:
+
+   ```sh
+   git tag v0.3.0 && git push origin v0.3.0
+   ```
+
+`.github/workflows/publish.yml` refuses to run if the tag and `config.yaml` disagree. It
+then pushes `ghcr.io/timblazing/alexa2mqtt-amd64` and `…-aarch64` (tagged with the version
+and `latest`) and opens a GitHub release using that changelog section as the notes. Home
+Assistant offers the update once Supervisor refreshes the repository.
 
 ## Attribution
 

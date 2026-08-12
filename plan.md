@@ -199,7 +199,7 @@ slug: alexa2mqtt
 description: Amazon Smart Air Quality Monitor → Home Assistant via MQTT
 url: "https://github.com/timblazing/alexa2mqtt"
 # NOTE: no `image:` key in Phase 3 — Supervisor builds the Dockerfile locally.
-# Phase 4 adds: image: "ghcr.io/timblazing/alexa2mqtt"
+# Phase 4 added: image: "ghcr.io/timblazing/alexa2mqtt-{arch}"
 arch: [amd64, aarch64]
 stage: experimental
 startup: application
@@ -470,9 +470,33 @@ Acceptance — **all observed on the real instance 2026-08-12**:
 - Auth persisted to `/data/auth.json` and survived the 0.1.0 → 0.1.1 update with no re-login.
 - No cookies, tokens, or credentials in the add-on log at default `debug: false`.
 
-**Phase 4 — publish and release.** GHCR multi-arch build (amd64 + aarch64), add the versioned
-`image:` key so Auto-update lights up, `ci.yml` + `publish.yml`, tag-equals-version check,
-auth reset action, README, v0.1.0 tag.
+**Phase 4 — publish and release. Implemented 2026-08-12, released as v0.3.0.** The project
+was renamed to **Alexa2MQTT** first (repo `timblazing/alexa2mqtt`, slug `alexa2mqtt`, MQTT
+topic prefix `alexa2mqtt`), which is why the first published tag is v0.3.0 rather than the
+v0.1.0 originally planned here.
+
+Deliverables:
+
+1. `.github/workflows/publish.yml`, triggered by a `v*` tag: a `verify` job that fails unless
+   the tag equals `app/config.yaml`'s `version`, an arch matrix that pushes
+   `ghcr.io/timblazing/alexa2mqtt-{amd64,aarch64}` tagged with the version and `latest`, and a
+   release job that cuts a GitHub release from that version's `CHANGELOG.md` section.
+2. `image: "ghcr.io/timblazing/alexa2mqtt-{arch}"` in `app/config.yaml`. Supervisor substitutes
+   `{arch}` and appends `:<version>`, so it pulls instead of building and **Auto update**
+   becomes real. Each arch is its own single-arch package — that is the shape Supervisor
+   expects, not one multi-arch manifest.
+3. `timeout-minutes` on both workflows' image jobs. An aarch64 build that misses the layer
+   cache runs `npm ci` under QEMU and otherwise inherits the six-hour default.
+4. README install section rewritten around pulling a published image, plus a Releasing
+   section documenting the bump-changelog-tag loop.
+
+**One manual step per package:** GHCR packages are created **private**. After the first
+publish, set both `alexa2mqtt-amd64` and `alexa2mqtt-aarch64` to public visibility, or
+Supervisor cannot pull them. This is not scriptable from the release workflow.
+
+Still deferred from this phase: the **auth reset action** (a control to drop
+`/data/auth.json` and force a fresh Amazon sign-in without reinstalling). Uninstall/reinstall
+is the workaround.
 
 ---
 

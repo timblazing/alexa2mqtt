@@ -1,8 +1,11 @@
 name: Alexa2MQTT
-version: "0.2.0"
+version: "0.3.0"
 slug: alexa2mqtt
 description: Amazon Smart Air Quality Monitor → Home Assistant via MQTT
 url: "https://github.com/timblazing/alexa2mqtt"
+# Supervisor substitutes {arch} and appends :version, so it pulls a published
+# image instead of building from the Dockerfile. Auto update needs this key.
+image: "ghcr.io/timblazing/alexa2mqtt-{arch}"
 arch:
   - amd64
   - aarch64

@@ -39,6 +39,9 @@ jobs:
   image:
     name: Build image (${{ matrix.arch }})
     runs-on: ubuntu-latest
+    # aarch64 builds run under QEMU. A cache miss makes them slow, so cap them
+    # instead of letting one burn the job's default six hours.
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:

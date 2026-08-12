@@ -396,7 +396,7 @@ export class MqttBridge {
 export const connectMqtt = async (config: Config): Promise<MqttBridge> => {
   const options: IClientOptions = {
     clean: true,
-    clientId: `amazon_air_quality_mqtt_${randomBytes(6).toString('hex')}`,
+    clientId: `alexa2mqtt_${randomBytes(6).toString('hex')}`,
     connectTimeout: 10_000,
     password: config.mqttPassword,
     reconnectPeriod: 5_000,

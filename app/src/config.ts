@@ -167,8 +167,7 @@ export const loadConfig = (
   }
 
   const mqttTopicPrefix =
-    env.MQTT_TOPIC_PREFIX?.trim().replace(/^\/+|\/+$/g, '') ||
-    'amazon_air_quality';
+    env.MQTT_TOPIC_PREFIX?.trim().replace(/^\/+|\/+$/g, '') || 'alexa2mqtt';
   if (/[+#\0]/.test(mqttTopicPrefix)) {
     throw new Error('MQTT_TOPIC_PREFIX cannot contain MQTT wildcards or null bytes');
   }

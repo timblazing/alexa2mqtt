@@ -1,6 +1,6 @@
 name: Alexa2MQTT
-version: "0.1.1"
-slug: amazon_air_quality_mqtt
+version: "0.2.0"
+slug: alexa2mqtt
 description: Amazon Smart Air Quality Monitor → Home Assistant via MQTT
 url: "https://github.com/timblazing/alexa2mqtt"
 arch:
@@ -25,7 +25,7 @@ options:
   mqtt_url: "mqtt://auto_username:auto_password@auto_hostname"
   amazon_domain: amazon.com
   poll_interval: 60
-  mqtt_topic_prefix: amazon_air_quality
+  mqtt_topic_prefix: alexa2mqtt
   debug: false
 schema:
   mqtt_url: url

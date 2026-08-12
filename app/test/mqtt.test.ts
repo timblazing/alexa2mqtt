@@ -14,7 +14,7 @@ const device = {
 
 describe('MQTT discovery', () => {
   it('builds one device-discovery payload with stable unique IDs', () => {
-    const payload = buildDeviceDiscoveryPayload('amazon_air_quality', device);
+    const payload = buildDeviceDiscoveryPayload('alexa2mqtt', device);
 
     expect(payload.dev).toEqual({
       ids: [device.id],
@@ -23,7 +23,7 @@ describe('MQTT discovery', () => {
       name: 'Bedroom monitor',
     });
     expect(payload.state_topic).toBe(
-      'amazon_air_quality/aaqm_0123456789abcdef/state',
+      'alexa2mqtt/aaqm_0123456789abcdef/state',
     );
     expect(Object.keys(payload.cmps)).toHaveLength(11);
     expect(
@@ -49,7 +49,7 @@ describe('MQTT discovery', () => {
   });
 
   it('keeps bridge availability off measurement entities', () => {
-    const payload = buildDeviceDiscoveryPayload('amazon_air_quality', device);
+    const payload = buildDeviceDiscoveryPayload('alexa2mqtt', device);
     const measurementIds = [
       'co_detected',
       'co_ppm',
@@ -65,14 +65,14 @@ describe('MQTT discovery', () => {
       expect(payload.cmps[id]?.availability_topic).toBeUndefined();
     }
     expect(payload.cmps.amazon_connected).toMatchObject({
-      availability_topic: 'amazon_air_quality/bridge/availability',
+      availability_topic: 'alexa2mqtt/bridge/availability',
       device_class: 'connectivity',
       entity_category: 'diagnostic',
     });
     expect(payload.cmps.bridge_connected).toMatchObject({
       device_class: 'connectivity',
       entity_category: 'diagnostic',
-      state_topic: 'amazon_air_quality/bridge/availability',
+      state_topic: 'alexa2mqtt/bridge/availability',
     });
   });
 

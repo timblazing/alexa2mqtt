@@ -32,7 +32,7 @@ once.
 | `amazon_domain`     | `amazon.com`                                       | The Amazon site your account belongs to.                                     |
 | `login_host`        | _(empty)_                                          | Host the Amazon login proxy advertises. Empty means the Home Assistant host's primary IPv4. Set it to the address you actually browse to (for example a Tailscale IP) when that differs. |
 | `poll_interval`     | `60`                                               | Seconds between Alexa queries (15–900).                                      |
-| `mqtt_topic_prefix` | `amazon_air_quality`                               | Prefix for the availability and state topics.                                |
+| `mqtt_topic_prefix` | `alexa2mqtt`                                       | Prefix for the availability and state topics.                                |
 | `debug`             | `false`                                            | Extra logging. Cookies, tokens and credentials are never logged.             |
 
 ## Entities
@@ -60,8 +60,8 @@ the app turns off **Bridge connected** and leaves the readings in place.
 ## Topics
 
 ```text
-amazon_air_quality/bridge/availability     # online/offline, retained
-amazon_air_quality/<device_id>/state       # retained JSON with all measurements
+alexa2mqtt/bridge/availability     # online/offline, retained
+alexa2mqtt/<device_id>/state       # retained JSON with all measurements
 homeassistant/device/<device_id>/config    # retained MQTT device discovery
 ```
 

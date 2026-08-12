@@ -195,7 +195,7 @@ and that's enough seam for v0.1.
 ```yaml
 name: Alexa2MQTT
 version: "0.1.0"
-slug: amazon_air_quality_mqtt
+slug: alexa2mqtt
 description: Amazon Smart Air Quality Monitor → Home Assistant via MQTT
 url: "https://github.com/timblazing/alexa2mqtt"
 # NOTE: no `image:` key in Phase 3 — Supervisor builds the Dockerfile locally.
@@ -218,7 +218,7 @@ options:
   mqtt_url: "mqtt://auto_username:auto_password@auto_hostname"
   amazon_domain: amazon.com
   poll_interval: 60
-  mqtt_topic_prefix: amazon_air_quality
+  mqtt_topic_prefix: alexa2mqtt
   debug: false
 schema:
   mqtt_url: url
@@ -297,8 +297,8 @@ export MQTT_PASSWORD="$(bashio::services mqtt password)"
 Topics:
 
 ```text
-amazon_air_quality/bridge/availability          # LWT: online/offline (retained)
-amazon_air_quality/<device_id>/state            # retained JSON, all measurements
+alexa2mqtt/bridge/availability          # LWT: online/offline (retained)
+alexa2mqtt/<device_id>/state            # retained JSON, all measurements
 homeassistant/device/<device_id>/config         # retained MQTT *device* discovery payload
 ```
 

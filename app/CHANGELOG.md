@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.2.0
+
+Renamed from *Amazon Air Quality to MQTT* to **Alexa2MQTT**. Both identifiers
+that Home Assistant keys off of changed, so this release is a clean reinstall
+rather than an update:
+
+- App slug is now `alexa2mqtt` (was `amazon_air_quality_mqtt`). Supervisor treats
+  it as a new app: uninstall the old one, then install this one and sign in to
+  Amazon again.
+- Default `mqtt_topic_prefix` is now `alexa2mqtt` (was `amazon_air_quality`).
+  Entities are re-created under the new topics; delete the stale MQTT device in
+  Home Assistant afterwards. Set the option back to `amazon_air_quality` to keep
+  the old topics.
+- New app icon and logo.
+
 ## 0.1.1
 
 - Adds a PM10 sensor. The monitor reports `Particulate matter PM10` alongside

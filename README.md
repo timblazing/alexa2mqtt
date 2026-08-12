@@ -1,3 +1,5 @@
+<img src="app/logo.png" alt="" width="250" height="100">
+
 # Alexa2MQTT
 
 A Home Assistant App (add-on) that connects **Amazon Smart Air Quality Monitors** to Home
@@ -66,8 +68,8 @@ connects. Set `ALEXA_ONCE=true` for a one-shot development run; the normal mode 
 These topics are used by default:
 
 ```text
-amazon_air_quality/bridge/availability
-amazon_air_quality/<device_id>/state
+alexa2mqtt/bridge/availability
+alexa2mqtt/<device_id>/state
 homeassistant/device/<device_id>/config
 ```
 

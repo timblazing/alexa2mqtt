@@ -85,7 +85,7 @@ export const renderStatusPage = (status: BridgeStatus): string => {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Amazon Air Quality to MQTT</title>
+<title>Alexa2MQTT</title>
 <style>
 body { font-family: system-ui, sans-serif; margin: 0 auto; max-width: 40rem; padding: 1.5rem; }
 h1 { font-size: 1.4rem; }
@@ -98,7 +98,7 @@ th { font-weight: 600; width: 12rem; }
 </style>
 </head>
 <body>
-<h1>Amazon Air Quality to MQTT</h1>
+<h1>Alexa2MQTT</h1>
 <p class="meta">MQTT broker: ${status.mqttConnected ? 'connected' : 'disconnected'} &middot; ${escapeHtml(AUTHENTICATION_LABELS[status.authentication])} &middot; Polling every ${status.pollIntervalSeconds} s</p>
 <div class="login">
 <p>Amazon sign-in runs on this address, and only answers to it. It is only needed while signing in.</p>

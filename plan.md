@@ -1,4 +1,4 @@
-# Amazon Air Quality to MQTT — build plan
+# Alexa2MQTT — build plan
 
 A Home Assistant App (formerly add-on) that connects Amazon Smart Air Quality Monitors to Home Assistant via MQTT, without Homebridge.
 
@@ -153,7 +153,7 @@ Deferred from the original plan: separate `iaq_status` text sensor, `data_fresh`
 ## Repository structure (simplified)
 
 ```text
-amazon-air-quality-mqtt/
+alexa2mqtt/
 ├── .github/workflows/
 │   ├── ci.yml            # lint, typecheck, test, build, docker build
 │   └── publish.yml       # on tag: multi-arch image → GHCR + GitHub release
@@ -193,13 +193,13 @@ and that's enough seam for v0.1.
 ## App `config.yaml` (v0.1)
 
 ```yaml
-name: Amazon Air Quality to MQTT
+name: Alexa2MQTT
 version: "0.1.0"
 slug: amazon_air_quality_mqtt
 description: Amazon Smart Air Quality Monitor → Home Assistant via MQTT
-url: "https://github.com/timblazing/amazon-air-quality-mqtt"
+url: "https://github.com/timblazing/alexa2mqtt"
 # NOTE: no `image:` key in Phase 3 — Supervisor builds the Dockerfile locally.
-# Phase 4 adds: image: "ghcr.io/timblazing/amazon-air-quality-mqtt"
+# Phase 4 adds: image: "ghcr.io/timblazing/alexa2mqtt"
 arch: [amd64, aarch64]
 stage: experimental
 startup: application

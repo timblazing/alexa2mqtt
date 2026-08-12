@@ -14,9 +14,9 @@ import type {
   StateCache,
 } from './state.js';
 
-const APP_NAME = 'Amazon Air Quality to MQTT';
+const APP_NAME = 'Alexa2MQTT';
 const APP_VERSION = '0.1.0';
-const SUPPORT_URL = 'https://github.com/timblazing/amazon-air-quality-mqtt';
+const SUPPORT_URL = 'https://github.com/timblazing/alexa2mqtt';
 const DISCOVERY_PREFIX = 'homeassistant';
 
 interface RuntimeDevice {

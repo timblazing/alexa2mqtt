@@ -1,4 +1,4 @@
-# Amazon Air Quality to MQTT
+# Alexa2MQTT
 
 Connects Amazon Smart Air Quality Monitors to Home Assistant over MQTT, without
 Homebridge. The app polls Alexa's cloud API and publishes one MQTT device per

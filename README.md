@@ -1,4 +1,4 @@
-# Amazon Air Quality to MQTT
+# Alexa2MQTT
 
 A Home Assistant App (add-on) that connects **Amazon Smart Air Quality Monitors** to Home
 Assistant via **MQTT** — no Homebridge required.
@@ -15,7 +15,7 @@ Assistant via **MQTT** — no Homebridge required.
    `/addons` on the Home Assistant host).
 2. **Settings → Add-ons/Apps → Apps page → ⋮ → Repositories**, add the repository URL, and
    reload. Skip this step for a clone in `/addons`.
-3. Install **Amazon Air Quality to MQTT** and start it. Supervisor builds the image locally
+3. Install **Alexa2MQTT** and start it. Supervisor builds the image locally
    from [`app/Dockerfile`](app/Dockerfile); the first build takes a few minutes.
 4. Open the Web UI and follow the Amazon login link on port 8098 of the Home Assistant host.
 

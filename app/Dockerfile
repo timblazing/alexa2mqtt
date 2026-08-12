@@ -23,9 +23,9 @@ RUN chmod 0755 /run.sh
 
 ARG BUILD_ARCH
 ARG BUILD_DESCRIPTION="Amazon Smart Air Quality Monitor to Home Assistant via MQTT"
-ARG BUILD_NAME="Amazon Air Quality to MQTT"
+ARG BUILD_NAME="Alexa2MQTT"
 ARG BUILD_REF=unknown
-ARG BUILD_REPOSITORY=timblazing/amazon-air-quality-mqtt
+ARG BUILD_REPOSITORY=timblazing/alexa2mqtt
 ARG BUILD_VERSION=0.1.0
 
 LABEL \

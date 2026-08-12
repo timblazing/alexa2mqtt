@@ -1,5 +1,5 @@
 {
-  "name": "amazon-air-quality-mqtt-bridge",
+  "name": "alexa2mqtt-bridge",
   "version": "0.1.0",
   "private": true,
   "type": "module",

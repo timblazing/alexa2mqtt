@@ -48,17 +48,22 @@ fi
 
 bashio::log.info "Amazon login proxy will advertise http://${login_host}:8098/"
 
+ALEXA_DEBUG=$(bashio::config 'debug')
+AMAZON_DOMAIN=$(bashio::config 'amazon_domain')
+MQTT_TOPIC_PREFIX=$(bashio::config 'mqtt_topic_prefix')
+POLL_INTERVAL=$(bashio::config 'poll_interval')
+
 export ALEXA_AUTH_PATH='/data/auth.json'
 export ALEXA_CAPTURE_FIXTURES='false'
 export ALEXA_DATA_DIR='/data'
-export ALEXA_DEBUG="$(bashio::config 'debug')"
+export ALEXA_DEBUG
 export ALEXA_ONCE='false'
 export ALEXA_PROXY_HOST="${login_host}"
 export ALEXA_PROXY_PORT='8098'
 export ALEXA_STATE_PATH='/data/last-state.json'
-export AMAZON_DOMAIN="$(bashio::config 'amazon_domain')"
-export MQTT_TOPIC_PREFIX="$(bashio::config 'mqtt_topic_prefix')"
-export POLL_INTERVAL="$(bashio::config 'poll_interval')"
+export AMAZON_DOMAIN
+export MQTT_TOPIC_PREFIX
+export POLL_INTERVAL
 export STATUS_PORT='8099'
 
 exec node /app/dist/index.js

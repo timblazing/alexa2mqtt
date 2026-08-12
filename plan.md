@@ -100,6 +100,23 @@ These were confirmed against the actual source code and current docs:
      exposed port. `watchdog` points at the same ingress port.
    - `init: false` because the HA base images already run s6-overlay.
 
+9. **Full device feature inventory** (from `data/captures/*.sanitized.json`, 2026-08-12).
+   The monitor exposes exactly **11 features**; there is no untapped data beyond PM10:
+   - Mapped to entities: `temperatureSensor`, and `range` instances `Indoor humidity` (4),
+     `Volatile organic compounds` (5), `Particulate matter` (6 → PM2.5),
+     `Particulate matter PM10` (7 → PM10), `Carbon monoxide` (8), `Indoor air quality` (9).
+   - **`Particulate matter` and `Particulate matter PM10` are separate range instances (6
+     and 7).** Until v0.1.1 only the former was mapped, so PM10 was parsed and discarded.
+     Name matching in `parser.ts` is exact string equality, so PM2.5 was never contaminated.
+   - Deliberately not exposed: `connectivity` and `endpointHealth` (both duplicate the
+     existing `Amazon connected` diagnostic; properties came back empty),
+     `proactiveNotificationSource` (no properties).
+   - **`toggle` instance 11 is writable** — `operations: [turnOn, turnOff]`, reads `ON` — but
+     carries **no `friendlyName`**, so nothing in the API says what it controls (likely the
+     status LED or sound detection). Not exposed: it is a control, not a measurement, and
+     identifying it means toggling real hardware. Resolve by flipping it in the Alexa app and
+     watching the device before writing any code.
+
 ---
 
 ## Target entities (v0.1)
@@ -405,10 +422,11 @@ with all 10 entities and fresh readings; measurements persisted when the bridge 
 when Alexa auth was withheld; both connectivity diagnostics changed correctly; cached state,
 Alexa authentication, and fresh polling recovered after restart.
 
-**Phase 3 — Home Assistant App packaging, locally built.** The goal is a real app that
-appears on the Apps page next to Ring-MQTT, survives reboots, and needs no terminal. It is
-built by Supervisor from the Dockerfile — **no `image:` key, no GHCR, no CI yet** — so the
-edit/rebuild loop stays fast.
+**Phase 3 — Home Assistant App packaging, locally built. DONE, validated on the real
+instance 2026-08-12 (app v0.1.1).** The goal was a real app that appears on the Apps page
+next to Ring-MQTT, survives reboots, and needs no terminal. It is built by Supervisor from
+the Dockerfile — **no `image:` key** — so the edit/rebuild loop stays fast. CI was added
+early (see below) because Docker is deliberately not installed on the development Mac.
 
 Deliverables:
 
@@ -429,13 +447,27 @@ Deliverables:
    auth state, and a link to the login proxy on 8098.
 7. `app/DOCS.md`, `app/CHANGELOG.md`, `app/icon.png`, `app/logo.png`, `app/translations/en.yaml`.
 
-Acceptance (must actually be observed on the real HA instance, not assumed):
+8. **Added during implementation:** a `login_host` option (`str?`, empty = auto-detect the
+   host's primary IPv4). The login proxy is a MITM for amazon.com and only answers to the
+   host it advertises, so auto-detection breaks when Home Assistant is reached over
+   Tailscale. Setting it to the Tailscale IP is what made sign-in work here.
+9. **Added during implementation:** `hassio_api: true`, needed so `run.sh` can read
+   `/network/info` for that auto-detected IPv4. Default role, read-only info endpoints only.
+10. **Added during implementation:** `.github/workflows/ci.yml` — lint/typecheck/test/build,
+    shellcheck on `run.sh`, and a QEMU matrix build of the image for amd64 + aarch64. This
+    replaces local Docker entirely; the Dockerfile is verified in CI, then built for real by
+    Supervisor on the HA host at install time.
 
-- App installs and starts; Info tab shows **Start on boot**, **Watchdog**, and **Ingress**.
-- Broker credentials are resolved automatically — the user never types them.
-- Entities update on the poll interval, unattended, with no terminal open. This is the whole
-  point of the phase; verify by watching `Last update` advance twice.
-- Restart the app → auth and last-known state survive. Reboot HA → app comes back by itself.
+Acceptance — **all observed on the real instance 2026-08-12**:
+
+- App installs from the custom repository and starts; Info tab shows **Start on boot**,
+  **Watchdog**, and **Ingress**. Start-on-boot and Watchdog both enabled by the user.
+- Broker credentials resolved automatically: `Using the Home Assistant MQTT service at
+  core-mosquitto:1883`. The user never typed them. This was the riskiest untested path and
+  it worked first try.
+- Entities update unattended, no terminal open — `Published fresh readings for 1 monitor(s)`
+  logged twice, `Last update` advancing.
+- Auth persisted to `/data/auth.json` and survived the 0.1.0 → 0.1.1 update with no re-login.
 - No cookies, tokens, or credentials in the add-on log at default `debug: false`.
 
 **Phase 4 — publish and release.** GHCR multi-arch build (amd64 + aarch64), add the versioned

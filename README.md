@@ -3,11 +3,11 @@
 A Home Assistant App (add-on) that connects **Amazon Smart Air Quality Monitors** to Home
 Assistant via **MQTT** — no Homebridge required.
 
-> **Status: Phase 3 / pre-alpha.** Authentication, raw state queries, MQTT discovery,
-> all 10 entities, retained measurements, connectivity diagnostics, and restart recovery were
-> validated against a real monitor and Home Assistant instance on August 6, 2026. The app is
-> now packaged as a locally built Home Assistant app; images are not published yet. See
-> [`plan.md`](plan.md).
+> **Status: Phase 3 complete / pre-alpha.** Installed and running as a Home Assistant app on
+> a real instance since August 12, 2026: Supervisor builds it from the Dockerfile, broker
+> credentials resolve automatically, Amazon sign-in persists across restarts and updates, and
+> all 11 entities update unattended on the poll interval. Images are not published to a
+> registry yet, so **Auto update does nothing** — that is Phase 4. See [`plan.md`](plan.md).
 
 ## Install as a Home Assistant app
 
@@ -63,7 +63,7 @@ failed Amazon responses never clear an earlier measurement; a failure only turns
 connects. Set `ALEXA_ONCE=true` for a one-shot development run; the normal mode polls at
 `POLL_INTERVAL` seconds and retries failures with bounded exponential backoff.
 
-Phase 2 uses these topics by default:
+These topics are used by default:
 
 ```text
 amazon_air_quality/bridge/availability

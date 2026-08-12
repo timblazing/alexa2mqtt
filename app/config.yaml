@@ -1,0 +1,36 @@
+name: Amazon Air Quality to MQTT
+version: "0.1.0"
+slug: amazon_air_quality_mqtt
+description: Amazon Smart Air Quality Monitor → Home Assistant via MQTT
+url: "https://github.com/timblazing/amazon-air-quality-mqtt"
+arch:
+  - amd64
+  - aarch64
+stage: experimental
+startup: application
+boot: auto
+init: false
+hassio_api: true
+services:
+  - mqtt:need
+ingress: true
+ingress_port: 8099
+webui: "http://[HOST]:[PORT:8098]/"
+watchdog: "http://[HOST]:[PORT:8099]/healthz"
+ports:
+  8098/tcp: 8098
+ports_description:
+  8098/tcp: Amazon login proxy, only needed while signing in
+options:
+  mqtt_url: "mqtt://auto_username:auto_password@auto_hostname"
+  amazon_domain: amazon.com
+  poll_interval: 60
+  mqtt_topic_prefix: amazon_air_quality
+  debug: false
+schema:
+  mqtt_url: url
+  amazon_domain: str
+  login_host: "str?"
+  poll_interval: "int(15,900)"
+  mqtt_topic_prefix: str
+  debug: bool

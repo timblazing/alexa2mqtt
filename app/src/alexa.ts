@@ -210,6 +210,7 @@ const authenticationUrl = (message: string): string | undefined =>
 export const initializeAlexa = async (
   config: Config,
   authPath: string,
+  onLoginRequired?: (url: string) => void,
 ): Promise<AlexaRemote> => {
   const remote = new AlexaRemote();
   const savedAuthentication = await loadAuthentication(authPath);
@@ -272,6 +273,7 @@ export const initializeAlexa = async (
             loginPromptShown = true;
             console.info(`Authentication required. Open ${url}`);
             console.info('Waiting for the Amazon login to complete...');
+            onLoginRequired?.(url);
           }
           return;
         }

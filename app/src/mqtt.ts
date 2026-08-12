@@ -188,7 +188,7 @@ const mqttUrl = (config: Config): string => {
   const host = config.mqttHost.includes(':')
     ? `[${config.mqttHost}]`
     : config.mqttHost;
-  return `mqtt://${host}:${config.mqttPort}`;
+  return `${config.mqttProtocol}://${host}:${config.mqttPort}`;
 };
 
 const sameMetadata = (
@@ -235,6 +235,10 @@ export class MqttBridge {
         void this.#enqueue(() => this.#publishEverything());
       }
     });
+  }
+
+  get connected(): boolean {
+    return this.#connected;
   }
 
   async initialize(): Promise<void> {

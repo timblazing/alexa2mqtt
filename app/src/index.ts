@@ -15,6 +15,12 @@ import { deviceMetadataFromEndpoint } from './device.js';
 import { connectMqtt, type MqttBridge } from './mqtt.js';
 import { parseAirQualityResponse } from './parser.js';
 import { backoffDelayMs, waitForDelay } from './polling.js';
+import {
+  startStatusServer,
+  type AuthenticationStatus,
+  type BridgeStatus,
+  type MonitorStatus,
+} from './server.js';
 import { loadStateCache, saveStateCache } from './state-file.js';
 import {
   mergeDeviceState,
@@ -41,6 +47,7 @@ const pollMonitors = async (
   statePath: string,
   capturesDir: string,
   config: Config,
+  monitorStatuses: Map<string, MonitorStatus>,
 ): Promise<PollCycleResult> => {
   const failures: string[] = [];
   let nextCache = cache;
@@ -53,6 +60,11 @@ const pollMonitors = async (
       reading = parseAirQualityResponse(response);
     } catch (error) {
       await mqtt.setAmazonConnected(monitor.device.id, false);
+      monitorStatuses.set(monitor.device.id, {
+        amazonConnected: false,
+        name: monitor.device.name,
+        state: monitorStatuses.get(monitor.device.id)?.state,
+      });
       failures.push(
         `${monitor.device.name}: ${error instanceof Error ? error.message : String(error)}`,
       );
@@ -71,6 +83,11 @@ const pollMonitors = async (
       nextCache.devices[monitor.device.id]!.state,
       true,
     );
+    monitorStatuses.set(monitor.device.id, {
+      amazonConnected: true,
+      name: monitor.device.name,
+      state: nextCache.devices[monitor.device.id]!.state,
+    });
 
     if (config.captureFixtures) {
       try {
@@ -103,9 +120,9 @@ const pollMonitors = async (
 
 const main = async (): Promise<void> => {
   const config = loadConfig();
-  const authPath = join(config.dataDir, 'auth.json');
+  const authPath = config.authPath;
   const capturesDir = join(config.dataDir, 'captures');
-  const statePath = join(config.dataDir, 'last-state.json');
+  const statePath = config.statePath;
   const shutdown = new AbortController();
   const requestShutdown = (): void => shutdown.abort();
   process.once('SIGINT', requestShutdown);
@@ -113,9 +130,27 @@ const main = async (): Promise<void> => {
 
   let mqtt: MqttBridge | undefined;
   let remote: Awaited<ReturnType<typeof initializeAlexa>> | undefined;
+  let authentication: AuthenticationStatus = 'starting';
+  const monitorStatuses = new Map<string, MonitorStatus>();
+  const readStatus = (): BridgeStatus => ({
+    authentication,
+    loginProxyUrl: `http://${config.proxyHost}:${config.proxyPort}/`,
+    monitors: [...monitorStatuses.values()],
+    mqttConnected: mqtt?.connected ?? false,
+    pollIntervalSeconds: config.pollIntervalSeconds,
+  });
+  const statusServer = await startStatusServer(config.statusPort, readStatus);
+  console.info(`Status page listening on port ${config.statusPort}`);
 
   try {
     let cache = await loadStateCache(statePath);
+    for (const { device, state } of Object.values(cache.devices)) {
+      monitorStatuses.set(device.id, {
+        amazonConnected: false,
+        name: device.name,
+        state,
+      });
+    }
     console.info(
       `Starting MQTT bridge (broker: ${config.mqttHost}:${config.mqttPort}, cached monitors: ${Object.keys(cache.devices).length})`,
     );
@@ -126,10 +161,13 @@ const main = async (): Promise<void> => {
     console.info(
       `Amazon login proxy: http://${config.proxyHost}:${config.proxyPort}/`,
     );
-    remote = await initializeAlexa(config, authPath);
+    remote = await initializeAlexa(config, authPath, () => {
+      authentication = 'waiting-for-login';
+    });
     if (shutdown.signal.aborted) {
       return;
     }
+    authentication = 'authenticated';
     console.info('Alexa authentication succeeded. Discovering devices...');
 
     const { endpoints, response: discoveryResponse } =
@@ -162,6 +200,11 @@ const main = async (): Promise<void> => {
     for (const monitor of monitors) {
       console.info(`- ${describeEndpoint(monitor.endpoint)}`);
       await mqtt.registerDevice(monitor.device);
+      monitorStatuses.set(monitor.device.id, {
+        amazonConnected: false,
+        name: monitor.device.name,
+        state: cache.devices[monitor.device.id]?.state,
+      });
     }
 
     let consecutiveFailures = 0;
@@ -174,6 +217,7 @@ const main = async (): Promise<void> => {
         statePath,
         capturesDir,
         config,
+        monitorStatuses,
       );
       cache = result.cache;
 
@@ -206,6 +250,7 @@ const main = async (): Promise<void> => {
     if (mqtt) {
       await mqtt.close();
     }
+    await statusServer.close();
   }
 };
 

@@ -1,0 +1,9 @@
+.env
+.env.example
+coverage/
+data/
+dist/
+node_modules/
+test/
+translations/
+*.log

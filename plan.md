@@ -82,6 +82,24 @@ These were confirmed against the actual source code and current docs:
 
 7. **License**: the plugin is MIT. Preserve copyright/license attribution in any ported file.
 
+8. **Patterns confirmed against `tsightler/ring-mqtt-ha-addon`** (read 2026-08-12, add-on v5.9.3 —
+   this is the reference implementation for "installs and runs continuously like a real app"):
+   - The **add-on repo is thin**: `repository.yaml`, `config.yaml`, `DOCS.md`, `CHANGELOG.md`,
+     `README.md`, `icon.png`, `logo.png` at the root. There is **no Dockerfile and no
+     `build.yaml`** — `image: 'tsightler/ring-mqtt'` points at a prebuilt multi-arch image
+     that the *code* repo builds and pushes. Supervisor pulls `image:<version>`, so
+     `config.yaml`'s `version` must equal the published tag. That is what makes Auto-update work.
+   - **Omitting `image:` makes Supervisor build the Dockerfile locally** (confirmed against
+     developers.home-assistant.io). This is the fast development path — no registry round-trip.
+     So: build locally first, add `image:` only once images are published.
+   - Broker config is exposed as a **single `mqtt_url` option defaulting to the sentinel
+     `mqtt://auto_username:auto_password@auto_hostname`**, resolved at runtime from the
+     Supervisor `services/mqtt` API. This keeps zero-config working while still allowing an
+     external broker. Adopt this instead of having no MQTT option at all.
+   - `ingress: true` + `ingress_port` + `webui` gives the in-HA "Open Web UI" button with no
+     exposed port. `watchdog` points at the same ingress port.
+   - `init: false` because the HA base images already run s6-overlay.
+
 ---
 
 ## Target entities (v0.1)
@@ -140,7 +158,8 @@ amazon-air-quality-mqtt/
 │   ├── run.sh
 │   ├── DOCS.md
 │   ├── CHANGELOG.md
-│   └── icon.png
+│   ├── icon.png
+│   └── logo.png
 ├── LICENSE                # MIT, with homebridge-alexa-smarthome attribution
 ├── plan.md
 ├── README.md
@@ -162,32 +181,55 @@ version: "0.1.0"
 slug: amazon_air_quality_mqtt
 description: Amazon Smart Air Quality Monitor → Home Assistant via MQTT
 url: "https://github.com/timblazing/amazon-air-quality-mqtt"
-image: "ghcr.io/timblazing/amazon-air-quality-mqtt"
+# NOTE: no `image:` key in Phase 3 — Supervisor builds the Dockerfile locally.
+# Phase 4 adds: image: "ghcr.io/timblazing/amazon-air-quality-mqtt"
 arch: [amd64, aarch64]
 stage: experimental
 startup: application
 boot: auto
 init: false
 services: [mqtt:need]
-ports:
-  8099/tcp: 8099   # status page + healthz
-  8098/tcp: 8098   # Amazon login proxy (alexa-cookie2)
-ports_description:
-  8099/tcp: Status page
-  8098/tcp: Amazon login proxy
-webui: "http://[HOST]:[PORT:8099]/"
+ingress: true
+ingress_port: 8099
+webui: "http://[HOST]:[PORT:8098]/"
 watchdog: "http://[HOST]:[PORT:8099]/healthz"
+ports:
+  8098/tcp: 8098   # Amazon login proxy (alexa-cookie2) — see note below
+ports_description:
+  8098/tcp: Amazon login proxy, only needed while signing in
 options:
+  mqtt_url: "mqtt://auto_username:auto_password@auto_hostname"
   amazon_domain: amazon.com
   poll_interval: 60
   mqtt_topic_prefix: amazon_air_quality
   debug: false
 schema:
+  mqtt_url: url
   amazon_domain: str
   poll_interval: "int(15,900)"
   mqtt_topic_prefix: str
   debug: bool
 ```
+
+### Ingress for status, a real port for the login proxy
+
+Ring-mqtt serves its whole UI over Ingress, but our login flow is **not** the same shape as
+theirs. `alexa-cookie2` does not serve a page — it runs a **man-in-the-middle proxy for
+amazon.com**, rewriting cookies, `Location` headers, and absolute URLs, and Amazon redirects
+back to whatever host/port it was told about via `proxyOwnIp`. Ingress serves the app under a
+rewritten subpath (`/api/hassio_ingress/<token>/`) with its own auth, which is very likely to
+break those absolute redirects and cookie domains.
+
+So v0.1 splits the two:
+
+- **Ingress (port 8099)** — the status page and `/healthz`. This is what gets the "Open Web UI"
+  button and drives the Watchdog toggle. Always on, no exposed port.
+- **Mapped port 8098** — the Amazon login proxy, reachable at a stable
+  `http://<ha-host>:8098/` that Amazon can redirect back to. The status page links to it.
+  Only needed during sign-in.
+
+Putting the login proxy behind Ingress is a genuine nice-to-have, but it must be **proven**
+before it replaces the mapped port — do not assume it works. Keep it in Deferred.
 
 Do not use `host_network`, `privileged`, `hassio_role: admin`, or `apparmor: false`.
 
@@ -363,11 +405,42 @@ with all 10 entities and fresh readings; measurements persisted when the bridge 
 when Alexa auth was withheld; both connectivity diagnostics changed correctly; cached state,
 Alexa authentication, and fresh polling recovered after restart.
 
-**Phase 3 — Home Assistant App packaging.** config.yaml, Dockerfile, run.sh, bashio MQTT
-credentials, status page + `/healthz`, install from this repo as a custom repository.
+**Phase 3 — Home Assistant App packaging, locally built.** The goal is a real app that
+appears on the Apps page next to Ring-MQTT, survives reboots, and needs no terminal. It is
+built by Supervisor from the Dockerfile — **no `image:` key, no GHCR, no CI yet** — so the
+edit/rebuild loop stays fast.
 
-**Phase 4 — polish and release.** Auth reset action, CI, GHCR multi-arch publish,
-DOCS.md/README, CHANGELOG, v0.1.0 tag.
+Deliverables:
+
+1. `repository.yaml` at the repo root so the repo can be added as a custom repository.
+2. `app/config.yaml` exactly as specified above (no `image:`).
+3. `app/Dockerfile` — multi-stage, `ghcr.io/home-assistant/{arch}-base:<pinned>` final stage
+   with `nodejs` added. Pin the base tag; do not use `latest`.
+4. `app/run.sh` — bashio reads options, resolves `mqtt_url`: if it is the
+   `auto_username:auto_password@auto_hostname` sentinel, substitute
+   `bashio::services mqtt` host/port/username/password; otherwise use it verbatim.
+   Export env vars, then `exec node /app/dist/index.js`. **No retry logic in Bash** — the
+   Node poll loop already handles backoff.
+5. Move persistent files to the add-on volume: `/data/auth.json`, `/data/last-state.json`
+   (currently `app/data/`). `config.ts` must take these as env-var paths so local `npm run dev`
+   still works unchanged.
+6. `app/src/server.ts` — HTTP server on 8099 serving `/healthz` (200 only when the MQTT client
+   is connected) and a status page showing last successful poll, per-metric values, Amazon
+   auth state, and a link to the login proxy on 8098.
+7. `app/DOCS.md`, `app/CHANGELOG.md`, `app/icon.png`, `app/logo.png`, `app/translations/en.yaml`.
+
+Acceptance (must actually be observed on the real HA instance, not assumed):
+
+- App installs and starts; Info tab shows **Start on boot**, **Watchdog**, and **Ingress**.
+- Broker credentials are resolved automatically — the user never types them.
+- Entities update on the poll interval, unattended, with no terminal open. This is the whole
+  point of the phase; verify by watching `Last update` advance twice.
+- Restart the app → auth and last-known state survive. Reboot HA → app comes back by itself.
+- No cookies, tokens, or credentials in the add-on log at default `debug: false`.
+
+**Phase 4 — publish and release.** GHCR multi-arch build (amd64 + aarch64), add the versioned
+`image:` key so Auto-update lights up, `ci.yml` + `publish.yml`, tag-equals-version check,
+auth reset action, README, v0.1.0 tag.
 
 ---
 
@@ -389,7 +462,9 @@ DOCS.md/README, CHANGELOG, v0.1.0 tag.
 - Device-name filtering / multi-account support
 - `iaq_status` enum sensor, `data_fresh` sensor, Refresh button
 - Per-metric timestamps and `stale_after` / expiry options
-- Ingress for the login flow
+- Ingress for the **login proxy** (status page is on Ingress from v0.1; moving the
+  alexa-cookie2 proxy there needs proof that Amazon's redirects and cookie domains survive
+  Ingress path rewriting — see "Ingress for status, a real port for the login proxy")
 - Mosquitto integration tests, Cosign image signing, armv7
 - Configurable discovery prefix and retain behavior
 

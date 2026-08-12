@@ -1,0 +1,33 @@
+configuration:
+  mqtt_url:
+    name: MQTT broker URL
+    description: >-
+      Leave the default to use the MQTT broker configured in Home Assistant.
+      Point it at another broker with mqtt://user:password@host:1883.
+  amazon_domain:
+    name: Amazon domain
+    description: >-
+      The Amazon site your account belongs to, for example amazon.com or
+      amazon.co.uk.
+  login_host:
+    name: Login host
+    description: >-
+      Hostname or IP the Amazon login proxy advertises to Amazon. Leave empty to
+      use the Home Assistant host's primary IPv4 address. Set it to the address
+      you actually browse to, for example a Tailscale IP, when that differs.
+  poll_interval:
+    name: Poll interval
+    description: >-
+      Seconds between Alexa queries. Lower values update sooner and query
+      Amazon more often.
+  mqtt_topic_prefix:
+    name: MQTT topic prefix
+    description: >-
+      Prefix for the availability and state topics published by the bridge.
+  debug:
+    name: Debug logging
+    description: >-
+      Log extra detail while troubleshooting. Cookies, tokens and credentials
+      are never logged.
+network:
+  8098/tcp: Amazon login proxy, only needed while signing in

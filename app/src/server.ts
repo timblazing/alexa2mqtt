@@ -30,6 +30,7 @@ const METRICS: Array<{ key: keyof DeviceState; label: string; unit?: string }> =
   { key: 'temperature_c', label: 'Temperature', unit: '°C' },
   { key: 'humidity_percent', label: 'Humidity', unit: '%' },
   { key: 'pm25_ug_m3', label: 'PM2.5', unit: 'µg/m³' },
+  { key: 'pm10_ug_m3', label: 'PM10', unit: 'µg/m³' },
   { key: 'co_ppm', label: 'CO level', unit: 'ppm' },
   { key: 'co_detected', label: 'CO detected' },
   { key: 'voc_index', label: 'VOC index' },

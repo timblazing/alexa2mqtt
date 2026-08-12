@@ -1,5 +1,5 @@
 name: Amazon Air Quality to MQTT
-version: "0.1.0"
+version: "0.1.1"
 slug: amazon_air_quality_mqtt
 description: Amazon Smart Air Quality Monitor → Home Assistant via MQTT
 url: "https://github.com/timblazing/amazon-air-quality-mqtt"

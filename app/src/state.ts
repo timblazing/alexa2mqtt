@@ -25,6 +25,7 @@ const NUMBER_METRICS = [
   'co_ppm',
   'humidity_percent',
   'iaq_score',
+  'pm10_ug_m3',
   'pm25_ug_m3',
   'temperature_c',
   'voc_index',

@@ -3,6 +3,7 @@ export interface NormalizedReading {
   co_ppm?: number;
   humidity_percent?: number;
   iaq_score?: number;
+  pm10_ug_m3?: number;
   pm25_ug_m3?: number;
   temperature_c?: number;
   voc_index?: number;
@@ -35,6 +36,7 @@ const RANGE_NAMES = {
   co_ppm: ['carbon monoxide'],
   humidity_percent: ['humidity', 'indoor humidity'],
   iaq_score: ['indoor air quality'],
+  pm10_ug_m3: ['particulate matter pm10', 'pm 10', 'pm10'],
   pm25_ug_m3: ['pm 2.5', 'pm2.5', 'particulate matter'],
   voc_index: ['volatile organic compounds'],
 } as const;

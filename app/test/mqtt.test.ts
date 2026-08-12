@@ -25,10 +25,10 @@ describe('MQTT discovery', () => {
     expect(payload.state_topic).toBe(
       'amazon_air_quality/aaqm_0123456789abcdef/state',
     );
-    expect(Object.keys(payload.cmps)).toHaveLength(10);
+    expect(Object.keys(payload.cmps)).toHaveLength(11);
     expect(
       new Set(Object.values(payload.cmps).map(({ unique_id }) => unique_id)).size,
-    ).toBe(10);
+    ).toBe(11);
     expect(payload.cmps.temperature_c).toMatchObject({
       device_class: 'temperature',
       name: 'Temperature',
@@ -37,6 +37,10 @@ describe('MQTT discovery', () => {
     });
     expect(payload.cmps.pm25_ug_m3).toMatchObject({
       device_class: 'pm25',
+      unit_of_measurement: 'µg/m³',
+    });
+    expect(payload.cmps.pm10_ug_m3).toMatchObject({
+      device_class: 'pm10',
       unit_of_measurement: 'µg/m³',
     });
     expect(payload.cmps.iaq_score?.name).toBe('IAQ score');

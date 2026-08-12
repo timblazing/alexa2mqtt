@@ -48,7 +48,7 @@ describe('status page', () => {
 
     expect(page).toContain('Amazon sign-in required');
     expect(page).toContain('Last successful update: never');
-    expect((page.match(/unknown/g) ?? []).length).toBe(7);
+    expect((page.match(/unknown/g) ?? []).length).toBe(8);
   });
 
   it('escapes device names', () => {

@@ -23,6 +23,7 @@ describe('parseAirQualityResponse', () => {
       co_ppm: 0,
       humidity_percent: 50,
       iaq_score: 91,
+      pm10_ug_m3: 12,
       pm25_ug_m3: 8,
       temperature_c: 22,
       voc_index: 5,
@@ -50,6 +51,10 @@ describe('parseAirQualityResponse', () => {
     pm10.properties[0]!.rangeValue.value = 999;
 
     expect(parseAirQualityResponse(response).pm25_ug_m3).toBe(8);
+  });
+
+  it('reads PM10 from its own feature', () => {
+    expect(parseAirQualityResponse(fixture).pm10_ug_m3).toBe(12);
   });
 
   it('ignores invalid numbers instead of manufacturing missing values', () => {

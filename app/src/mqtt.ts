@@ -145,6 +145,14 @@ export const buildDeviceDiscoveryPayload = (
         p: 'sensor',
         value_template: '{{ value_json.last_successful_update }}',
       }),
+      pm10_ug_m3: component('pm10_ug_m3', {
+        device_class: 'pm10',
+        name: 'PM10',
+        p: 'sensor',
+        state_class: 'measurement',
+        unit_of_measurement: 'µg/m³',
+        value_template: '{{ value_json.pm10_ug_m3 }}',
+      }),
       pm25_ug_m3: component('pm25_ug_m3', {
         device_class: 'pm25',
         name: 'PM2.5',

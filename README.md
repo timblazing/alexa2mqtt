@@ -27,7 +27,7 @@ Full app documentation lives in [`app/DOCS.md`](app/DOCS.md).
   [homebridge-alexa-smarthome](https://github.com/joeyhage/homebridge-alexa-smarthome)
   (no password stored in the app config).
 - Discover your Amazon Smart Air Quality Monitor(s) and poll Alexa's API for raw values:
-  IAQ score (0–100), temperature, humidity, PM2.5, CO (ppm), and VOC index.
+  IAQ score (0–100), temperature, humidity, PM2.5, PM10, CO (ppm), and VOC index.
 - Publish one Home Assistant MQTT device per monitor using MQTT device discovery, with
   retained last-known values that survive Amazon outages and restarts.
 - Run as a proper Home Assistant App: start on boot, watchdog, and auto-update via

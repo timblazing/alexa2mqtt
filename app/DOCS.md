@@ -45,6 +45,7 @@ Each monitor appears as a single device with these entities:
 | Temperature      | sensor        | °C                                                        |
 | Humidity         | sensor        | %                                                         |
 | PM2.5            | sensor        | µg/m³                                                     |
+| PM10             | sensor        | µg/m³                                                     |
 | CO level         | sensor        | ppm                                                       |
 | CO detected      | binary sensor | Derived: CO level above 10 ppm                            |
 | VOC index        | sensor        | An index, not a concentration                             |

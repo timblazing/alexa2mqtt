@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1
+
+- Adds a PM10 sensor. The monitor reports `Particulate matter PM10` alongside
+  `Particulate matter`, but only the latter was mapped, so PM10 was discarded.
+  PM2.5 readings were never affected.
+
 ## 0.1.0
 
 First packaged release. Not published to a registry yet — Supervisor builds the

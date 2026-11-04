@@ -26,7 +26,9 @@ ARG BUILD_DESCRIPTION="Amazon Smart Air Quality Monitor to Home Assistant via MQ
 ARG BUILD_NAME="Alexa2MQTT"
 ARG BUILD_REF=unknown
 ARG BUILD_REPOSITORY=timblazing/alexa2mqtt
-ARG BUILD_VERSION=0.1.0
+ARG BUILD_VERSION=0.3.0
+
+ENV APP_VERSION="${BUILD_VERSION}"
 
 LABEL \
   io.hass.name="${BUILD_NAME}" \

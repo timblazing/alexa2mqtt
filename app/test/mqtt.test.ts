@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import {
   buildDeviceDiscoveryPayload,
@@ -11,6 +11,16 @@ const device = {
   model: 'Smart Air Quality Monitor',
   name: 'Bedroom monitor',
 };
+
+const originalAppVersion = process.env.APP_VERSION;
+
+afterEach(() => {
+  if (originalAppVersion === undefined) {
+    delete process.env.APP_VERSION;
+  } else {
+    process.env.APP_VERSION = originalAppVersion;
+  }
+});
 
 describe('MQTT discovery', () => {
   it('builds one device-discovery payload with stable unique IDs', () => {
@@ -74,6 +84,20 @@ describe('MQTT discovery', () => {
       entity_category: 'diagnostic',
       state_topic: 'alexa2mqtt/bridge/availability',
     });
+  });
+
+  it('uses the trimmed environment version in discovery metadata', () => {
+    process.env.APP_VERSION = ' 0.3.0 ';
+
+    expect(buildDeviceDiscoveryPayload('alexa2mqtt', device).o.sw).toBe('0.3.0');
+  });
+
+  it('uses a development version when no environment version is present', () => {
+    delete process.env.APP_VERSION;
+
+    expect(buildDeviceDiscoveryPayload('alexa2mqtt', device).o.sw).toBe(
+      '0.0.0-dev',
+    );
   });
 
   it('uses the required discovery, state, and LWT topics', () => {

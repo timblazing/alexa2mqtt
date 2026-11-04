@@ -15,9 +15,11 @@ import type {
 } from './state.js';
 
 const APP_NAME = 'Alexa2MQTT';
-const APP_VERSION = '0.1.0';
+const DEVELOPMENT_VERSION = '0.0.0-dev';
 const SUPPORT_URL = 'https://github.com/timblazing/alexa2mqtt';
 const DISCOVERY_PREFIX = 'homeassistant';
+
+const appVersion = (): string => process.env.APP_VERSION?.trim() || DEVELOPMENT_VERSION;
 
 interface RuntimeDevice {
   amazonConnected: boolean;
@@ -184,7 +186,7 @@ export const buildDeviceDiscoveryPayload = (
     },
     o: {
       name: APP_NAME,
-      sw: APP_VERSION,
+      sw: appVersion(),
       url: SUPPORT_URL,
     },
     qos: 1,
